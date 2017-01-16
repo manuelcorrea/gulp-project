@@ -24,7 +24,7 @@ gulp.task('clean', function(){
 
 // Concatenate & Minify JS
 gulp.task('transpile', function() {
-    return gulp.src('js/*.js')
+    return gulp.src('lib/*.js')
         .pipe(babel({
               presets: ['es2015']
           }))
@@ -34,7 +34,7 @@ gulp.task('transpile', function() {
 gulp.task('browserify', function(){
 
   var options = {
-        entries: "./js/app.js",
+        entries: "./lib/app.js",
         extensions: [".js"],
         paths: ["./js/"] // This allows relative imports in require, with './scripts/' as root
     };
@@ -49,7 +49,7 @@ gulp.task('browserify', function(){
 });
 
 gulp.task('commonjs', function(){
-  return gulp.src(['js/*.js'])
+  return gulp.src(['lib/*.js'])
     .pipe(commonjsWrap({
       autoRequire: true
     }))
@@ -58,15 +58,14 @@ gulp.task('commonjs', function(){
 
 // Lint Task
 gulp.task('lint', function() {
-    return gulp.src('js/*.js')
+    return gulp.src('lib/*.js')
         .pipe(jshint())
         .pipe(jshint.reporter('default'));
 });
 
 // Watch Files For Changes
 gulp.task('watch', function() {
-    gulp.watch('js/*.js', ['lint', 'scripts']);
-    gulp.watch('scss/*.scss', ['sass']);
+    gulp.watch('lib/*.js', ['lint', 'scripts']);
 });
 
 // Default Task
