@@ -9,12 +9,51 @@ import babel from 'gulp-babel'
 import concat from 'gulp-concat'
 import uglify from 'gulp-uglify'
 import rename from 'gulp-rename'
-import browserify from 'gulp-browserify'
+import browserify from 'browserify'
+import buffer from 'vinyl-buffer'
+import sourcemaps from 'gulp-sourcemaps'
+import babelify from 'babelify'
+import source from 'vinyl-source-stream';
+import commonjsWrap from 'gulp-wrap-commonjs'
 
-gulp.task('build', ['clean', 'scripts']);
+gulp.task('build', ['clean', 'transpile', 'browserify', 'commonjs']);
 
 gulp.task('clean', function(){
   return rimraf('dist', function(){});
+});
+
+// Concatenate & Minify JS
+gulp.task('transpile', function() {
+    return gulp.src('js/*.js')
+        .pipe(babel({
+              presets: ['es2015']
+          }))
+        .pipe(gulp.dest('dist'));
+});
+
+gulp.task('browserify', function(){
+
+  var options = {
+        entries: "./js/app.js",
+        extensions: [".js"],
+        paths: ["./js/"] // This allows relative imports in require, with './scripts/' as root
+    };
+
+    return browserify(options)
+        .transform(babelify)
+        .bundle()
+        .pipe(source("app.min.js"))
+        .pipe(buffer())
+        .pipe(uglify())
+        .pipe(gulp.dest("./dist/browser/"));
+});
+
+gulp.task('commonjs', function(){
+  return gulp.src(['js/*.js'])
+    .pipe(commonjsWrap({
+      autoRequire: true
+    }))
+    .pipe(gulp.dest('dist/module'));
 });
 
 // Lint Task
@@ -22,27 +61,6 @@ gulp.task('lint', function() {
     return gulp.src('js/*.js')
         .pipe(jshint())
         .pipe(jshint.reporter('default'));
-});
-
-// Compile Our Sass
-gulp.task('sass', function() {
-    return gulp.src('scss/*.scss')
-        .pipe(sass())
-        .pipe(gulp.dest('dist/css'));
-});
-
-// Concatenate & Minify JS
-gulp.task('scripts', function() {
-    return gulp.src('js/*.js')
-        .pipe(babel())
-        // .pipe(browserify({
-        //   insertGlobals : true
-        // }))
-        //.pipe(concat('cbauth.js'))
-        .pipe(gulp.dest('dist'))
-        .pipe(rename('cbauth.min.js'))
-        .pipe(uglify())
-        .pipe(gulp.dest('dist/js'));
 });
 
 // Watch Files For Changes
