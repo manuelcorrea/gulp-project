@@ -18,23 +18,29 @@ import commonjsWrap from 'gulp-wrap-commonjs'
 
 gulp.task('build', ['clean', 'transpile', 'browserify', 'commonjs']);
 
-gulp.task('clean', function(){
-  return rimraf('dist', function(){});
+gulp.task('clean-lib', function(){
+   return rimraf('lib', function(){});
 });
+
+gulp.task('clean-dist', function(){
+   return rimraf('dist', function(){});
+});
+
+gulp.task('clean', ['clean-dist', 'clean-lib']);
 
 // Concatenate & Minify JS
 gulp.task('transpile', function() {
-    return gulp.src('lib/*.js')
+    return gulp.src('src/*.js')
         .pipe(babel({
               presets: ['es2015']
           }))
-        .pipe(gulp.dest('dist'));
+        .pipe(gulp.dest('lib'));
 });
 
 gulp.task('browserify', function(){
 
   var options = {
-        entries: "./lib/app.js",
+        entries: "./src/app.js",
         extensions: [".js"],
         paths: ["./js/"] // This allows relative imports in require, with './scripts/' as root
     };
@@ -49,7 +55,7 @@ gulp.task('browserify', function(){
 });
 
 gulp.task('commonjs', function(){
-  return gulp.src(['lib/*.js'])
+  return gulp.src(['src/*.js'])
     .pipe(commonjsWrap({
       autoRequire: true
     }))
@@ -58,7 +64,7 @@ gulp.task('commonjs', function(){
 
 // Lint Task
 gulp.task('lint', function() {
-    return gulp.src('lib/*.js')
+    return gulp.src('src/*.js')
         .pipe(jshint())
         .pipe(jshint.reporter('default'));
 });
