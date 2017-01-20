@@ -1,10 +1,7 @@
-class FooBar {
+export default class FooBar {
   constructor() {
   }
-
   render() {
     return 'foobar'
   }
 }
-
-export { FooBar as default}
